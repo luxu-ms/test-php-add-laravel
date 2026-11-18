@@ -487,7 +487,7 @@ authorized; no push or pull request is part of this step.
 
 ## Step 2: Procedural front controller -> Laravel-managed taskboard
 
-**Status:** pending
+**Status:** done
 
 **Source:** `public\index.php` handles routing, native sessions, input validation,
 CSRF, repository calls, and direct template inclusion.
@@ -565,6 +565,226 @@ Observe HTTP 200 task rendering, a created task surviving reload, 303 writes,
 Failures must be logged/reported, not swallowed. Stop the exact server process
 after checks. This establishes framework HTTP/integration behavior; screenshot
 evaluation and approval remain Step 3 requirements.
+
+**Step 2 execution evidence (2026-11-18, UTC+08:00):**
+
+Executed only Step 2 in app session
+`d5477c98-8d6b-4079-a479-978fb7de8c8a`, worktree
+`C:\source\github-copilot\copilot-worktrees\test-php-add-laravel\luxu-ms-special-funicular`,
+branch `luxu-ms-php-step-2-laravel-http`. Verified starting HEAD
+`a26d332fda74d39fc1f8a39a159f6694309412c4` and a clean working tree before edits.
+Read this plan, its detailed Step 0 contracts/Step 1 evidence, the unchanged dated
+readiness snapshot, and the map's framework, Composer, acceptance, integration,
+test-evidence and missing-tools/supported-alternatives guidance. Step 0/1 evidence
+is historical and unchanged. Step 3 is still pending.
+
+**Implementation and boundaries:** `public\index.php` now enters Laravel's real
+HTTP kernel. The single root web route invokes the container-injected
+`TaskController` using the existing `TaskRepository`/PDO bindings, and renders the
+existing `tasks.php` through Laravel's PHP view engine. The view's only change is
+the equivalent local escaping closure; no duplicate Blade template or layout/CSS
+change was made. Native controller sessions, manual class includes, and direct
+template includes were removed. Request body/query bags remain separate; the
+front controller preserves the original form-only body source and disables
+method overrides. Root requests skip Laravel's trimming/empty-to-null middleware.
+
+`TaskCsrf` replaces the default root web forgery middleware, checks the existing
+`csrf` field against Laravel's actual session token on every POST, and does not
+trust same-origin headers. Its fail-closed rejection is consumed by the controller
+before any write, after the original list/filter reads; this preserves validation
+ordering, including non-string CSRF 422 versus missing/mismatched scalar 403.
+It is not a CSRF exemption or disabled-test path. Session notices are explicitly
+consumed once on rendered pages, not by early 303/403/405 responses. The controller
+retains the domain validation and raw invalid-form model, exact notices, filtered
+URLs, relative 303 Location, missing-task 404/reset editor and 405/Allow contract.
+The exception handler logs failures through PHP's error log and returns the
+sanitized generic 500 with the existing security/content headers.
+
+**Small directly coupled configuration fix:** The first route listing exposed
+Laravel 13's inherited filesystem `local.serve=true`, which automatically added
+GET/HEAD and PUT `storage/{path}` routes. This is not a taskboard capability.
+Added only `config\filesystems.php`'s local driver/root/`serve=false` override;
+subsequent route listings show exactly the root task route. The initial overly
+small override containing only `serve=false` failed with "Undefined array key
+driver" because the local disk array is replaced, not recursively merged at that
+level; retaining its driver/root corrected that failure. No storage endpoints,
+uploads, new infrastructure or general hardening were added.
+
+Added guarded plain-PHP/cURL/DOM `tests\http.php`, the distinct six-group
+`tests\acceptance.md` final scenario suite, and Composer `start`, `test:http` and
+`test:acceptance` entry points. `test:acceptance` displays the scenario guide,
+explicitly not a UAT result. README documents the actual Laravel boot, local key,
+child-runtime requirements, isolated runner and separate visual gate.
+`src\Database.php`, `src\TaskRepository.php`, their SQL/validation, schema,
+`public\styles.css`, the original `tests\run.php` and all its assertions,
+`composer.lock`, and `readiness.md` are unchanged (`git diff --exit-code`).
+No ORM, migration, authentication, parallel app, SPA/build tooling, deployment,
+dependency update, tool install, shared INI/PATH change, push or PR occurred.
+
+**Exact tools and commands:** Commands ran in PowerShell from this worktree.
+The following variables abbreviate the actual approved paths/flags:
+
+```powershell
+$php = 'C:\Users\luxu\.copilot\session-state\fff568d2-f6a3-4d39-b958-e799e20b2828\files\php-runtime\php.exe'
+$composer = 'C:\Users\luxu\.copilot\session-state\fff568d2-f6a3-4d39-b958-e799e20b2828\files\composer\composer.phar'
+$phpArgs = @('-d','extension=curl','-d','extension=fileinfo','-d','extension=mbstring','-d','extension=zip')
+$artifacts = 'C:\Users\luxu\.copilot\session-state\73d310d6-e4d0-4386-9122-43035a260739\files'
+& $php @phpArgs $composer install --no-interaction --prefer-dist
+& $php @phpArgs $composer validate --strict --no-interaction
+& $php @phpArgs $composer check-platform-reqs
+& $php @phpArgs artisan route:list --path=/
+& $php @phpArgs artisan route:list --path=/ -vv
+$files = @('public\index.php','routes\web.php','bootstrap\app.php',
+    'views\tasks.php','app\Http\Controllers\TaskController.php',
+    'app\Http\Middleware\TaskCsrf.php','app\Http\Middleware\TaskResponseHeaders.php',
+    'config\filesystems.php','tests\http.php')
+foreach ($file in $files) { & $php @phpArgs -l $file }
+git hash-object composer.lock
+git rev-parse HEAD:composer.lock
+git diff --check
+git diff --exit-code -- src\Database.php src\TaskRepository.php database\schema.sql public\styles.css tests\run.php docs\php-x-to-y\readiness.md composer.lock
+```
+
+Ordinary restore exited 0, installing the same 74 reviewed locked libraries with
+normal hooks and no re-resolution. All 18 platform requirements succeeded.
+Strict validation ran twice, each time exit **1 with only the explicitly approved
+unspecified-license warning**; neither run is claimed as a strict exit-0 pass.
+No other Composer warning/error was accepted. Working/HEAD lock Git object IDs
+both equal `32e2ac8a66f1135186a1bd6586db0693e4ad15f3`. All nine touched PHP
+files parsed; the final middleware/runner edits were linted again. Whitespace
+checks passed. Final route listing exits 0 with exactly the root task controller
+route, including the web middleware group; no database/key is needed for listing.
+
+**Isolated configuration and launch:** Created this worktree's ignored
+`config\database.local.php` and `.env` as empty files, removed inherited ACLs and
+verified protection plus exactly current-user/SYSTEM access before writing any
+secrets. `git check-ignore --quiet` passed for both. The session-only
+`step2-environment.php` reads only the explicitly approved restricted source
+settings from
+`C:\source\github-copilot\copilot-worktrees\test-php-add-laravel\luxu-ms-congenial-couscous\config\database.local.php`,
+selects `taskboard_php84_test` in the generated configuration and `DB_DATABASE`,
+and sets the other approved DB_* overrides process-locally. A random key is
+generated only into that ignored restricted `.env`; no secret is printed or
+stored in Git/evidence. Before mutation or live checks, `SELECT DATABASE()`
+equaled exactly `taskboard_php84_test`, with only the existing `tasks` table and
+zero rows. No unknown tables/data were removed.
+
+An independent route-list command accidentally raced the brief empty placeholder
+during secure configuration generation and failed "database.local.php must return
+an array." It made no database connection; rerunning after generation completed
+passed. This was an orchestration failure, not repaired by weakening validation.
+
+```powershell
+$env:DB_DATABASE = 'taskboard_php84_test'
+& $php @phpArgs "$artifacts\step2-environment.php" prepare
+& $php @phpArgs "$artifacts\step2-environment.php" repository
+# In the dedicated attached server shell only:
+$env:PHP_INI_SCAN_DIR = "$artifacts\step2-runtime"
+& $php "$artifacts\step2-environment.php" serve
+```
+
+The serve mode calls the real application's
+`handleCommand(new ArgvInput(['artisan','serve','--host=127.0.0.1','--port=8081','--no-reload']))`
+with the approved DB environment retained. The isolated INI overlay loads only
+the four packaged modules missing from the shared INI; no duplicate module flags
+are used on that overlay-backed invocation. The actual Artisan web child,
+not merely its parent CLI, ran as `cli-server`, PID **55840**, on the previously
+unused `127.0.0.1:8081`. The session-only auto-prepend guard verifies cURL,
+Fileinfo, Mbstring, Zip, PDO MySQL and DOM, explicit DB_DATABASE and actual
+SELECT DATABASE() in that child before each application request. It records
+only non-secret runtime provenance; it neither replaces the application nor
+creates a debug endpoint. Actual readiness returned HTTP 200 and the intentional
+empty taskboard. The key is loaded from this worktree's `.env`, never dropped
+or replaced by launching the child. The documented direct-router alternative
+was not needed or executed; all HTTP evidence below used Artisan's real child.
+
+**Repository/HTTP execution, failures and recoveries:**
+
+```powershell
+$env:TASKBOARD_HTTP_SERVER_PROOF = "$artifacts\step2-server-proof.json"
+& $php @phpArgs "$artifacts\step2-environment.php" http
+& $php @phpArgs "$artifacts\step2-environment.php" guard-negative
+& $php @phpArgs "$artifacts\step2-environment.php" composer-http
+& $php @phpArgs "$artifacts\step2-environment.php" composer-acceptance
+& $php @phpArgs tests\http.php
+& $php @phpArgs tests\http.php --base-url=http://127.0.0.1:8000
+& $php @phpArgs "$artifacts\step2-environment.php" repository
+```
+
+The `http` wrapper establishes the exact empty-database guard then invokes the
+normal committed command with the approved PHP/module flags:
+`php tests\http.php --base-url=http://127.0.0.1:8081`.
+It does not mock middleware or responses. Before its first write the runner
+checks explicit URL/database/launch provenance, decrypts the real Laravel session
+cookie using this checkout's key and matches the actual form token against this
+checkout's file session. Its cURL cookie jar, requests and DOM assertions exercise
+the active real server, with automatic redirect following disabled.
+
+- Both original repository runs exited 0: **"All task repository tests passed."**
+  No assertions changed or were omitted; that runner does not emit a numeric
+  assertion count. Each run was preceded by exact identity/table/empty guards
+  and followed by a zero-row rollback check.
+- Two preliminary HTTP runs failed at the redirect assertion: Laravel's URL
+  generator emitted `http://127.0.0.1:8081` instead of the original relative `/`.
+  The second run exposed that actual Location diagnostically. Returned an
+  explicit Laravel 303 response with the original relative Location; retained
+  strict filter/edit assertions rather than loosening the behavior. Each failed
+  run cleaned its uniquely prefixed fixture and verified zero remaining rows.
+- The corrected initial suite passed **763 assertions**. Expanded stale-session,
+  notice-ordering, body/query, invalid-model and deletion checks passed
+  **817 assertions / 131 requests**, then the same expanded suite passed again
+  through the actual Composer `test:http` script. The Composer child used the
+  inherited isolated INI overlay; no module/platform bypass was used.
+- Extra live `PROPFIND`/`COPY` probes exposed Laravel's default 405 Allow list
+  (`GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS`), unlike the original contract.
+  Added narrow root method-exception rendering and those cases to the runner.
+  The **final complete HTTP run exited 0: 836 assertions / 133 actual requests**.
+  Status counts were **200:49, 303:17, 403:11, 404:4, 405:10, 422:42**.
+  This includes exact plain failure bodies and `Allow: GET, POST` for
+  HEAD/OPTIONS/PUT/PATCH/DELETE/TRACE/CONNECT/PROPFIND/COPY, same-origin invalid
+  tokens, non-string CSRF 422, expired-session cookie/reload recovery, no method
+  override/JSON-form semantics, CRUD/reloads, notice consumption, ordering,
+  completion-preserving edits/date clear, literal searches/combined filters,
+  global counts, escaping, Unicode and exact date/priority/input limits.
+- Negative guards produced the expected exit 1 for no explicit URL, port 8000,
+  and a populated test table. For the last case the session helper first verified
+  emptiness and created one identifiable owned guard fixture; the runner refused
+  before HTTP/mutation and left it untouched. The helper removed only that exact
+  ID and verified emptiness. These are expected safety refusals, not passing
+  application requests or waived errors.
+- Composer `test:acceptance` exited 0 and displayed the separate six-group guide
+  with an explicit "not an executed or approved UAT result" message. No visual
+  scenario, screenshot evaluation or final user approval ran.
+
+**Sanitized 500/logging evidence:** After the normal web-child exact-database
+guard, a temporary session-artifact fault flag set only that request's DB_PORT
+to an invalid non-secret string. The real Laravel/PDO binding then failed the
+unchanged configuration validator, before opening another database connection.
+`Invoke-WebRequest -Uri http://127.0.0.1:8081/ -SkipHttpErrorCheck -TimeoutSec 10`
+returned 500 with exactly the original sanitized unavailability message,
+nosniff and CSP; no exception/connection data leaked in the response.
+The actual server log contains
+`RuntimeException: Invalid MySQL host, port, database name, or username.`
+at `src\Database.php:21`. Removing the flag restored HTTP 200 on the same server;
+the final full HTTP/repository runs above followed this recovery. The fault was
+test-only process configuration, not an application endpoint or substituted DB.
+No validation is declared independent of unavailable database/list reads.
+
+**Cleanup and remaining gate:** Every HTTP run cleaned only its unique
+run-prefixed/recorded IDs; final exact database guard again found only `tasks`
+with **zero rows**. Stopped the exact attached `step2-laravel-server` process
+tree; verified PID 55840 gone and port 8081 no longer listening. Removed the
+ignored local credential/key files, temporary launch proof, fault flag, cookie
+jars and generated framework/session files. Existing application port 8000,
+other services, databases and the ordinary eight-task dataset were not contacted
+or changed. Final database-free `artisan route:list --path=/` still passed after
+the credential/key files were removed. Only approved source/tests/docs/this
+Step 2 evidence are included in the local Step 2 commit.
+
+Step 2 is **done for actual Laravel HTTP integration**, not final visual or user
+acceptance. The six scenario groups are prepared but unexecuted; **Step 3 remains
+pending** and requires a new approved session, real screenshots/evaluation and
+explicit user acceptance. No push, pull request or deployment was performed.
 
 ## Step 3: Run AI-assisted user acceptance testing
 

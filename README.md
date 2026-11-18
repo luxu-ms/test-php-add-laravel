@@ -2,9 +2,9 @@
 
 A responsive, server-rendered task manager for **PHP 8.4**. Create, edit, complete,
 reopen, and delete tasks, with MySQL storage and no frontend build step.
-Composer manages Laravel 13 and application autoloading. This intermediate step
-boots Laravel through Artisan only; the existing public entry point still serves
-the taskboard unchanged until the in-place HTTP conversion.
+Laravel 13 serves the existing application through its HTTP kernel, web routes,
+container, file sessions, and PHP view engine. Persistence remains the existing
+PDO repository and MySQL schema; there is no ORM or frontend build.
 
 ## Task organization
 
@@ -34,8 +34,8 @@ Copy `config/database.example.php` to `config/database.local.php` and enter your
 connection details. The local file is ignored by Git. Environment variables
 `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, and `DB_PASSWORD` override the
 local configuration. Defaults are `127.0.0.1:3306` and database `taskboard_php84`.
-The existing web entry point, setup script, and repository tests do not load
-`.env` files. Keep database settings in the existing local file or process
+The Laravel web entry point loads `.env`; the setup script and repository tests
+do not. Keep database settings in the existing local file or process
 environment; do not move them to Laravel's `.env`.
 
 For TLS-enabled servers, set `ssl_ca` in the local configuration (or `DB_SSL_CA`)
@@ -67,8 +67,8 @@ application license, the narrowly accepted exception recorded in
 Laravel uses UTC, file sessions/cache, and the existing `views` directory.
 Keep `bootstrap\cache`, `storage\framework\sessions`, `storage\framework\views`,
 `storage\framework\cache`, and `storage\logs` writable. Artisan boot does not
-require a database connection or application key. When preparing the later HTTP
-conversion in an approved local environment, copy `.env.example` to ignored
+require a database connection or application key. Before serving HTTP
+in an approved local environment, copy `.env.example` to ignored
 `.env` and run `php artisan key:generate`; never commit the generated key.
 Do not use Artisan database/migration commands: `config\database.php` remains
 the application's flat PDO configuration, not Laravel database-manager settings.
@@ -76,21 +76,38 @@ the application's flat PDO configuration, not Laravel database-manager settings.
 All commands must use PHP with the required extensions enabled. If supplying
 process-local `-d extension=...` flags, include them on every PHP invocation,
 including the invocation of `composer.phar`; child PHP processes do not
-automatically inherit those flags. The existing Composer `start`, `setup`, and
-`test` scripts invoke a separate PHP process.
+automatically inherit those flags. Composer scripts invoke separate PHP processes;
+Artisan's web child uses bare
+`PHP_BINARY` without the caller's `-d` flags. A process-local `PHP_INI_SCAN_DIR`
+overlay containing only the missing already-packaged modules, inherited by
+`artisan serve --no-reload`, can preserve those capabilities without editing a
+shared `php.ini`. Preserve `DB_DATABASE`, the approved database settings and
+`APP_KEY` when launching children, and verify the actual web process capabilities.
 
 Only with an approved dedicated MySQL database/account configured, initialize
-the application's table and start the existing public entry point:
+the application's table and start the single Laravel entry point:
 
 ```powershell
 php scripts\setup.php
-php -S 127.0.0.1:8000 -t public
+php artisan serve --host=127.0.0.1 --port=8000 --no-reload
 ```
 
 Open <http://127.0.0.1:8000>. `composer setup` and
 `composer start` run the same commands. Setup creates the table if missing; it does
 not drop existing tables. The web application only needs SELECT, INSERT, UPDATE,
 and DELETE permissions after setup.
+
+If a child cannot inherit process-local module flags, an equivalent development
+launch from the public directory is:
+
+```powershell
+Push-Location public
+php -d extension=curl -d extension=fileinfo -d extension=mbstring -d extension=zip -S 127.0.0.1:8081 ..\vendor\laravel\framework\src\Illuminate\Foundation\resources\server.php
+Pop-Location
+```
+
+It uses the same Laravel router and `public\index.php`, not a second application.
+Use an unused approved test port instead of contacting an existing app.
 
 The application no longer reads SQLite. Any previous `storage/tasks.sqlite` file
 is left untouched as a backup; existing data is not automatically imported.
@@ -112,6 +129,30 @@ the test table remains for subsequent runs. The runner connects before checking
 the name and creates its table outside the rollback transaction, so the suffix
 alone is not permission or isolation. Run only against an explicitly approved
 isolated test database. `composer test` also runs these same database tests.
+
+The real HTTP regression suite additionally requires the explicitly approved
+`taskboard_php84_test` database, an empty existing `tasks` table, a running server
+from this checkout with the same restricted configuration/key, and a non-secret
+verified launch record as described in `tests\acceptance.md`:
+
+```powershell
+$env:DB_DATABASE = 'taskboard_php84_test'
+$env:TASKBOARD_HTTP_SERVER_PROOF = '<session-artifact launch record path>'
+php tests\http.php --base-url=http://127.0.0.1:8081
+composer test:http -- --base-url=http://127.0.0.1:8081
+composer test:acceptance
+```
+
+The HTTP suite uses cURL cookies and DOM parsing against real middleware,
+verifies this checkout's encrypted Laravel session before writes, and cleans only
+its uniquely identified fixtures. It refuses implicit URLs, port 8000, unverified
+server provenance, a different database, or pre-existing task rows. Never clear
+unknown data to make a run pass. `test:acceptance` displays the separate six-group
+visual scenario suite; it does **not** execute or approve visual UAT.
+Reload a stale form to obtain a usable token; every POST requires the existing
+`csrf` field, including same-origin requests. Inline invalid forms return 422,
+missing tasks 404, invalid scalar tokens 403, successful writes 303, and unsupported
+methods (including HEAD/OPTIONS) 405 with `Allow: GET, POST`.
 
 ## Configuration and deployment
 
