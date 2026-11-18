@@ -1,6 +1,6 @@
 ## Step 0: Baseline -> reproducible baseline
 
-**Status:** pending
+**Status:** done
 
 **Source:** Framework-free, server-rendered PHP 8.4 taskboard with MySQL.
 
@@ -13,7 +13,8 @@ unavailable checks explicitly distinguished from failures.
 `C:\source\github-copilot\copilot-worktrees\test-php-add-laravel\luxu-ms-fuzzy-winner`;
 branch: `luxu-ms-php-readiness-and-plan`. No plan previously existed here.
 The preceding assessment is recorded in `docs\php-x-to-y\readiness.md`.
-All execution outcomes below are pending; planning ran no builds, tests, or servers.
+At plan creation, all execution outcomes were pending; planning ran no builds,
+tests, or servers. Step 0 execution evidence is recorded below.
 
 **Destination and boundaries:** Adopt `laravel/framework:^13.0` in this existing
 application, retain PHP `~8.4.0`, and lock the resolved packages in `composer.lock`.
@@ -79,6 +80,177 @@ up only fixtures created for this run. Stop the specific server process afterwar
 If authorization or prerequisites are missing, record the withheld check and why;
 do not contact the existing running app. These are baseline observations, not
 Laravel acceptance.
+
+**Step 0 execution evidence (2026-11-18, UTC+08:00):**
+
+Completed the best-effort baseline attempt in the dedicated worktree
+`C:\source\github-copilot\copilot-worktrees\test-php-add-laravel\luxu-ms-urban-train`,
+branch `luxu-ms-php-step-0-baseline`, app session
+`221a5134-8a78-4125-91e1-bacf4c5e5613`. Starting HEAD was approved bootstrap
+`c8b5b0b887d3fa545eb5c53a1e8ee5275be5452d` on application source
+`0b2b2d111b2f6585de011502a1ab46433b08f057`; `git status --short` was empty.
+Read all 12 files named in this step, the dated readiness snapshot, and the map
+index/readiness articles on build/restore, test evidence, and integrations.
+Only this plan's Step 0 status/evidence changed; application, configuration, tests,
+CSS, schema, and `readiness.md` remain untouched. Steps 1-3 remain pending.
+
+**Commands and actual results:** Commands ran from this worktree using PowerShell.
+`$php` below denotes the approved executable, not a PATH-selected runtime:
+
+```powershell
+$php = 'C:\Users\luxu\.copilot\session-state\fff568d2-f6a3-4d39-b958-e799e20b2828\files\php-runtime\php.exe'
+& $php -v
+& $php --ini
+& $php -m
+git ls-files -- '*.php'
+git ls-files -- '*.php' '*test*' '*phpunit*' '*lock*' '*composer*'
+$files = @(git ls-files -- '*.php')
+$failures = 0
+foreach ($file in $files) {
+    & $php -l ($file.Replace('/', '\'))
+    if ($LASTEXITCODE -ne 0) { $failures++ }
+}
+& $php -d extension=curl -d extension=fileinfo -d extension=mbstring -m
+Get-Command composer, composer.phar -CommandType Application -ErrorAction SilentlyContinue
+Get-Content -LiteralPath .\composer.json -Raw | ConvertFrom-Json -ErrorAction Stop
+```
+
+- Version, INI discovery, default modules, and process-local modules each exited 0.
+  CLI is PHP 8.4.27 NTS x64, Zend Engine 4.4.27, satisfying the original
+  `~8.4.0` constraint. The loaded `php.ini` is beside the approved executable;
+  no additional INI scan directory/files were reported.
+- Default modules include PDO, `pdo_mysql`, OpenSSL, session, DOM, PCRE, and
+  tokenizer; cURL, Fileinfo, and Mbstring are not loaded by default. The separate
+  authorized `-d extension=curl -d extension=fileinfo -d extension=mbstring -m`
+  invocation successfully lists all three. No runtime edits or installations
+  occurred. Future Composer/Artisan/HTTP processes must use an approved invocation
+  with required capabilities; this module probe is not a full Laravel platform
+  check and says nothing about the existing web server's runtime.
+- All eight tracked PHP files parsed: `config\database.example.php`,
+  `config\database.php`, `public\index.php`, `scripts\setup.php`,
+  `src\Database.php`, `src\TaskRepository.php`, `tests\run.php`, and
+  `views\tasks.php`. Each lint exited 0; aggregate syntax failures: 0.
+  No application assertions or database code executed through lint.
+- Manifest JSON parsing succeeded. It declares only PHP/PDO/PDO MySQL,
+  no third-party packages, and `start`, `setup`, `test` scripts; no dependency
+  restore is needed for this baseline. JSON parsing is not Composer validation.
+  Tracked-file discovery found only `tests\run.php` as a test runner, with no
+  PHPUnit configuration or HTTP/browser runner.
+- Composer PATH discovery returned no applications. Additional bounded,
+  read-only `Test-Path -LiteralPath <candidate> -PathType Leaf` checks returned
+  false for `%ProgramData%\ComposerSetup\bin\composer.bat` and `composer.phar`,
+  `%APPDATA%\Composer\vendor\bin\composer.bat`,
+  `%LOCALAPPDATA%\ComposerSetup\bin\composer.bat`, and this worktree's
+  `composer.phar`, `composer.lock`, and `vendor\autoload.php`.
+  This does not establish that Composer is absent elsewhere. Composer validation,
+  dependency resolution/restore, and platform checks were not run; an approved
+  Composer 2 path/environment is still needed for Step 1.
+- `Test-Path -LiteralPath .\config\database.local.php -PathType Leaf` returned
+  false. No ignored credential file from another checkout, environment values,
+  raw connection strings, or secret-store contents were read or copied.
+- No executed capability/syntax check failed. Composer was undiscovered in the
+  bounded locations, rather than a failed Composer command. No source repair,
+  runtime installation, dependency installation, setup hook, or service start
+  was attempted.
+
+**Baseline source contracts (inspection, not executed behavior):**
+
+- **Persistence and CRUD:** `src\TaskRepository.php:13-116` uses prepared MySQL
+  statements against `tasks`. Lists sort by `completed` ascending, then newest
+  ID first. Create returns the inserted ID; schema defaults give incomplete,
+  medium-priority tasks and a creation timestamp. Edit changes title,
+  description, priority, and date without altering completion. Toggle changes
+  `completed` to `1 - completed`; delete removes only the requested ID.
+  Missing update/toggle/delete rows raise `OutOfBoundsException`; find returns
+  null for an absent ID. Found-row semantics in `src\Database.php` preserve
+  successful identical-value updates rather than treating them as missing.
+  `database\schema.sql` requires MySQL-specific unsigned types, completion and
+  priority constraints, InnoDB, and `utf8mb4_0900_as_ci`; it was read, not executed.
+- **Values and validation:** `public\index.php:28-47,53-54,83-105` reads query and
+  body fields separately. Missing/null fields become empty strings; non-string
+  fields, including arrays, raise a 422 validation error. Task IDs must be positive
+  integers; an empty ID creates only for `save`. Form defaults are empty
+  title/description/date, null ID, and medium priority. Save captures submitted
+  values before repository validation, so ordinary invalid save values redisplay
+  untrimmed; persistence trims title/description. Title is 1-200 Unicode
+  characters and description 0-5,000, validated as UTF-8 by PCRE with multiline
+  content allowed. Priority must be exactly low/medium/high; an empty priority
+  is invalid. Date must be empty or an exact valid `YYYY-MM-DD` in
+  1000-01-01 through 9999-12-31; empty becomes SQL NULL. No global
+  trim/empty-to-null request middleware exists. Invalid scalar select/date
+  values remain in the form model, but native controls cannot necessarily display
+  them as a valid selection/date. See `src\TaskRepository.php:53-94`.
+- **Search/filter preservation:** `public\index.php:65-73` trims query `q` and
+  defaults empty/missing `status` to all. Repository search permits at most 200
+  Unicode characters and matches title OR description through
+  `instr(lower(...), lower(?))`, not LIKE; `%`, `_`, and quotes are literal text.
+  Status is exactly all/active/completed, AND-combined with search. Nonempty search
+  and non-all status are encoded into `$listUrl`; edit links add only `edit`,
+  write forms and 303 redirects retain filters but drop `edit`, Cancel retains
+  filters, and Clear returns `/` (`views\tasks.php:37-52,63-67,87-92,103-129`).
+  SQL matching/collation behavior still requires real MySQL verification.
+- **HTTP and failure ordering:** With a usable database, `GET /` renders the
+  list and optional `?edit=` form; `POST /` accepts only save/toggle/delete.
+  Successful writes return 303 to the filtered list. Missing/mismatched scalar
+  CSRF tokens return 403 with reload guidance; non-string token input raises
+  422 through field validation. Invalid fields/actions/filter/ID return inline
+  422; missing tasks return inline 404 and reset the editor. Unsupported methods,
+  including HEAD/OPTIONS, reach 405 with `Allow: GET, POST`. Other throwables are
+  logged and return a sanitized 500; unsupported PHP versions return 500
+  (`public\index.php:8-21,63-143`). Crucially database connection and list/filter
+  reads precede CSRF/method/action checks: those response expectations assume
+  preceding operations succeed, not an isolated request-validation path.
+- **Session and notices:** Native sessions use strict mode, HttpOnly,
+  SameSite=Lax, and Secure when HTTPS is detected. A 32-byte random token encoded
+  as hex is retained in the session and compared using `hash_equals` on POST.
+  All write forms use the field `csrf`. Successful notices are exactly
+  `Task added.`, `Task updated.`, `Task status updated.`, and `Task deleted.`;
+  the next rendered response consumes the notice once
+  (`public\index.php:16-21,50-51,76-80,107-113,145-146`).
+  Early exit responses do not consume it.
+- **Counts and rendering:** Summary total/in-progress/completed use the unfiltered
+  list, while the list heading shows filtered count of total. Empty global data
+  displays `A fresh start.`; an empty filtered result displays
+  `No matching tasks.`. `views\tasks.php` renders Taskboard branding, a
+  server-rendered list/editor, escaped text/attribute values using
+  `htmlspecialchars(ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')`, and descriptions
+  through `nl2br` after escaping. Completion changes labels/styles; priority
+  badges and optional semantic due dates remain. An incomplete task is overdue
+  only when its date precedes PHP's server-local `date('Y-m-d')`; no application
+  timezone override is present. Notices use `role=status`, errors `role=alert`,
+  and controls have labels. `/styles.css` is the only stylesheet; there is no
+  JavaScript/frontend build. CSS uses a two-column desktop workspace and, at
+  widths <=760px, one column with editor first and badge hidden
+  (`views\tasks.php:1-137`, `public\styles.css:31,84-92`).
+- **Database configuration boundary:** `config\database.php:5-41` merges
+  defaults, optional ignored `database.local.php`, then present DB_* environment
+  overrides, including empty values; PHP does not load `.env` automatically.
+  No registry lookup exists. `src\Database.php` validates configuration, uses
+  native prepares, associative/non-stringified fetches, UTF-8 and UTC connection
+  initialization. Certificate verification is default; disabling it is permitted
+  only for literal loopback addresses with a readable CA file. This is a source
+  contract, not evidence that any actual credentials, TLS, or database work.
+
+**Withheld/unverified checks and consequences:** Did not run
+`php tests\run.php`, `composer test`, `php scripts\setup.php`, or `composer setup`;
+did not start a server, invoke `composer start`, contact MySQL/the existing app,
+or make HTTP/browser requests. The shared services are unauthorized, and no
+approved dedicated empty test database/configuration or known isolated fixture
+was supplied. `tests\run.php:27-41` connects before checking the `_test` suffix
+and executes DDL before its transaction; rollback at lines 112-116 cannot make
+that resource use safe. `scripts\setup.php:14-21` can create persistent schema.
+No tests passed or failed because no assertions ran. Actual MySQL version/schema,
+TLS/permissions, CRUD/reload persistence, search results, HTTP/status/session/CSRF
+behavior, notices/counts, and visual/responsive rendering remain unverified.
+There are no baseline screenshots or observed live status codes. Syntax and
+source inspection are not successful application reproduction.
+
+Step 0 is **done for the approved best-effort attempt**, not certification of a
+working application. The unverified baseline alone does not block Step 1.
+Process-local extension loading is available without shared-runtime edits, but
+approved Composer remains undiscovered; database and live validation later still
+require explicit resource authorization and safely supplied isolated configuration.
+All later required validation and acceptance gates remain in force.
 
 ## Step 1: Manual includes -> Composer-managed Laravel bootstrap
 
