@@ -42,16 +42,23 @@ present the results for explicit user approval through the coordinator.
   It does not create schema, disable middleware, use mocks, follow redirects
   implicitly, or replace the following visual scenarios.
 
-For visual scenarios use the available Browser canvas's navigation, interaction,
-viewport and screenshot actions. Inspect those capabilities first; do not install
-a new browser/tool. Wait at most 10 seconds for each expected page state.
+For visual scenarios inspect the available Browser canvas's navigation,
+interaction and screenshot actions first; do not assume a viewport action exists.
+If exact dimensions cannot be selected there, use an already installed browser
+with an isolated, restricted profile and loopback-only browser control, without
+installing tools. Record the browser/version and actual `innerWidth`/`innerHeight`;
+CSS scaling alone is not a viewport check. Capture both the requested viewport
+and supplementary full-page or scrolled views when controls are below the fold,
+without changing the viewport. Ordinary vertical scrolling is not obstruction.
+Wait at most 10 seconds for each expected page state, including a fresh document
+after navigation/submission rather than controls changed in the previous page.
 Use a unique run prefix for every created task, record its IDs, and clean only
 those IDs. Keep screenshots in session artifacts, not Git.
 
 ## 1. Empty taskboard
 
-Open `/` with the verified empty test table at a desktop viewport (for example
-1280x900). Capture the page before creating fixtures.
+Open `/` with the verified empty test table at desktop 1280x900.
+Capture the page before creating fixtures.
 
 Expected: Taskboard branding, "Your day, in order.", zero total/in-progress/
 completed counts, "A fresh start.", and a usable labeled creation form. No
@@ -131,6 +138,10 @@ image-capable evaluator must cite visible evidence and identify missing evidence
 not infer unseen interactions. Confirmed failure takes precedence over
 inconclusive; overall pass requires every expectation. Rerun affected scenarios
 after a fix and preserve initial failures/recoveries.
+Keep interaction/HTTP/database outcomes separate from visual judgments: exact
+whitespace, persistence, status codes, session provenance and token enforcement
+cannot be certified from screenshots. Record native-control boundary cases from
+the unchanged guarded HTTP suite, not by weakening the application's validation.
 
 Delete only recorded run-owned fixtures, verify exact database identity and zero
 remaining rows, stop only this run's server process/tree, and remove temporary

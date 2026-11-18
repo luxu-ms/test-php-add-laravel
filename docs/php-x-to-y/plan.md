@@ -788,7 +788,7 @@ explicit user acceptance. No push, pull request or deployment was performed.
 
 ## Step 3: Run AI-assisted user acceptance testing
 
-**Status:** pending
+**Status:** pending explicit user acceptance; execution and visual evaluation complete
 
 **Source:** Laravel-managed taskboard with repository and HTTP regression checks;
 no completed visual acceptance evidence.
@@ -863,7 +863,174 @@ and visual expectation passes, the app demonstrably runs through Laravel 13, and
 the existing MySQL data/URL/form/UI contracts are preserved. Present results and
 evidence to the canvas parent for user review and explicit acceptance before
 declaring the transformation accepted. Do not commit, publish, or continue into
-deployment as part of this plan; publication requires separate user approval.
+deployment without authorization. The approved Step 3 assignment authorizes local
+verified progress/results commits only; publication requires separate user approval.
+
+**Step 3 execution evidence (2026-11-18, UTC+08:00):**
+
+Executed only the final acceptance step in app session
+`abda7cdc-944d-4480-b569-f99e9c9f6abb`, branch
+`luxu-ms-php-step-3-acceptance`, starting at verified Step 2 commit
+`dc222b8916d53ca1ce25bc3fed36fd2b4ed2c049`. The initial working tree was clean.
+The **latest plan root** is this worktree:
+`C:\source\github-copilot\copilot-worktrees\test-php-add-laravel\luxu-ms-scaling-disco\docs\php-x-to-y\plan.md`.
+Earlier worktree references above are historical evidence, not alternate progress
+roots. Read the full committed plan, both acceptance/HTTP runners, the map index,
+mandatory AI-assisted UAT article and supported-alternatives guidance.
+
+Only this plan and `tests\acceptance.md` changed. The guide now explicitly handles
+missing viewport actions, installed-browser alternatives, true viewport versus
+full-page captures, fresh-document waits, and the limits of screenshot evidence.
+Its six scenario expectations were fixed before capture and were not weakened.
+`tests\http.php` needed no correction. No application, CSS, schema, SQL, manifest,
+lock, original repository assertions, or dated readiness snapshot changed.
+
+**Tools, exact commands and final checks:** Commands ran from this worktree with
+PowerShell; the following variables abbreviate the actual paths:
+
+```powershell
+$php = 'C:\Users\luxu\.copilot\session-state\fff568d2-f6a3-4d39-b958-e799e20b2828\files\php-runtime\php.exe'
+$composer = 'C:\Users\luxu\.copilot\session-state\fff568d2-f6a3-4d39-b958-e799e20b2828\files\composer\composer.phar'
+$a = @('-d','extension=curl','-d','extension=fileinfo','-d','extension=mbstring','-d','extension=zip')
+$artifacts = 'C:\Users\luxu\.copilot\session-state\5315fc23-7c3b-4f89-9031-74e19ec4e8b1\files'
+& $php @a $composer install --no-interaction --prefer-dist
+& $php @a $composer validate --strict --no-interaction
+& $php @a $composer check-platform-reqs
+$files = @(git diff --name-only 0b2b2d111b2f6585de011502a1ab46433b08f057 HEAD -- '*.php')
+foreach ($file in $files) { & $php @a -l ($file.Replace('/', '\')) }
+& $php @a -l artisan
+$env:DB_DATABASE = 'taskboard_php84_test'
+& $php @a "$artifacts\step3-environment.php" prepare
+& $php @a "$artifacts\step3-environment.php" repository
+# Dedicated attached server shell; no shared PHP/PATH changes:
+$env:PHP_INI_SCAN_DIR = "$artifacts\step3-runtime"
+& $php "$artifacts\step3-environment.php" serve
+# Separate ordinary module-flagged CLI shell:
+& $php @a "$artifacts\step3-environment.php" http
+# The wrapper launches this exact committed runner after its empty-DB guard:
+& $php @a tests\http.php --base-url=http://127.0.0.1:8081 --server-proof="$artifacts\step3-server-proof.json"
+& $php @a artisan route:list --path=/ -vv
+git hash-object composer.lock
+git diff --check
+```
+
+Ordinary restore exited 0: the same 74 locked libraries, no updates/removals,
+normal hooks and no platform bypass. Lock Git object remained
+`32e2ac8a66f1135186a1bd6586db0693e4ad15f3`. Strict validation exited **1 with only
+the explicitly approved unspecified-license warning**; this is not strict exit-0
+success. All 18 platform requirements succeeded. All 17 transformation-changed
+PHP files plus `artisan` parsed (18 files, zero syntax failures). Route listing
+showed exactly the task root route and active `web` middleware group.
+
+Both original repository runs passed with all retained assertions, exact
+database/empty-table guards before execution, and zero rows after rollback.
+The runner does not emit a numeric assertion count. The first and final complete
+HTTP runs each passed **836 assertions / 133 requests** through the real Laravel
+entry point, with status counts **200:49, 303:17, 403:11, 404:4, 405:10, 422:42**.
+Actual cookie decryption and token/file-session matching authenticated this
+checkout before writes; middleware/CSRF protection was never disabled.
+
+A repeat after visual UAT hit a single **10.008-second transport timeout** during
+the Unicode/invalid-value phase; the runner still cleaned its exact owned rows
+and verified zero remaining rows. No application error or root cause was
+established. Readiness immediately returned 200/empty on the same server;
+the complete unchanged HTTP suite then passed again with the full counts above.
+The timeout is retained as a failed intermediate attempt, not hidden or waived.
+No retry timeout was increased and no expectation relaxed.
+
+**Isolated environment and provenance:** Only the approved restricted application
+settings source was reused, from the explicitly authorized
+`luxu-ms-congenial-couscous\config\database.local.php` checkout. Created this
+worktree's ignored local configuration/key placeholders with inheritance removed
+and exactly current-user/SYSTEM ACL rules, verified protection/ignore status, then
+wrote the settings. Both local configuration and `DB_DATABASE` selected exactly
+`taskboard_php84_test`. Before mutation/live access, actual `SELECT DATABASE()`
+matched that exact name, only the existing `tasks` table existed, and it had zero
+rows. No unknown tables/data were cleared and no schema/setup command was added.
+
+The session-only `step3-environment.php` launches the real application's Artisan
+`serve --host=127.0.0.1 --port=8081 --no-reload` command. Its isolated INI overlay
+loads the four already packaged modules. The actual `cli-server` child PID
+**75884** ran the session-only auto-prepend guard before application requests,
+verifying native cURL/Fileinfo/Mbstring/Zip/PDO MySQL/DOM, explicit DB_DATABASE and
+actual database identity. A fresh non-secret launch record named this exact root,
+URL, database and child. Readiness returned 200/intentional empty state.
+HTTP checks independently verified UTC and the real session/key provenance.
+No stale Step 2 helper path/proof, substitute server, debug endpoint, stub, SQLite,
+disabled protections, shared INI change or tool installation was used.
+
+**Distinct browser acceptance, not another HTTP-suite alias:** Inspected Browser
+canvas capabilities and opened/read/captured the actual empty app in
+`step3-taskboard-review`. Canvas has no viewport-setting action. Used the existing
+`C:\Program Files\Google\Chrome\Application\chrome.exe`, version
+**134.0.6998.178**, headless, in a new ACL-restricted session-only profile with
+loopback DevTools port 9223, not the user's normal browser profile. A session-only
+Python standard-library CDP helper performed actual browser typing, native form
+submissions/navigation, select/date input, reloads and screenshots. Later clicks
+were coordinate-dispatched after scroll/hit testing, not hidden-control clicks.
+No package/browser/extension installation, application JavaScript or Node tooling
+was added. Exact `innerWidth`/`innerHeight` were **1280x900** and **390x844**, DPR 1;
+paired full-page captures retain that viewport rather than simulate mobile by CSS.
+All expected-state waits remained bounded at 10 seconds.
+
+Executed the six groups separately with
+`python "$artifacts\step3-browser.py" 1` through `6`; there are **69 final
+interaction/state checks** (3/6/15/25/8/12). The guide-display command is not
+counted as UAT. Group 1/2 were repeated from verified emptiness for complete
+below-fold screenshots. Visual fixtures used prefix `uat-abda7cdc-` and IDs
+**73, 74** (lifecycle/search/delete), **75** (Unicode recapture) and **76**
+(responsive checks); the HTTP runner used its own unique fixtures.
+Sanitized direct PDO reads verified the Unicode title, literal multiline
+description, high priority, completion=0 and overdue date **2026-11-17** for both
+creation captures. Browser form submissions normalize newlines to CRLF.
+
+Screenshot/evaluation artifacts are retained outside Git under `$artifacts`.
+Each PNG has a same-name JSON recording browser, true viewport, URL, summary,
+form values and visible task state, without cookies/tokens/keys. `-full.png`
+files supplement the same-name 1280x900 or 390x844 viewport PNGs. The
+image-capable coding model inspected the actual images against the unchanged
+expectations, not CSS alone; detailed per-expectation judgments are in
+`step3-acceptance-evidence.md`.
+
+| Group | Result and supporting visible evidence |
+|---|---|
+| 1. Empty desktop | **Pass.** `g1-empty-desktop[-full].png`: Taskboard branding, Your day/in order, 0/0/0, fresh start and all labeled creation controls. |
+| 2. Create/reload/overdue | **Pass.** `g2-created-overdue-desktop[-full].png`, `g2-reloaded-overdue-desktop[-full].png`: quoted Unicode/emoji/Japanese title, separate description lines, literal script-like text and ampersand, High/In progress/Overdue 2026-11-17; notice present then absent. Persistence/escaping/once-only behavior also have independent DB/browser/HTTP evidence. |
+| 3. Lifecycle/order/counts | **Pass.** `g3-edited-desktop-full.png`, `g3-completed-desktop-full.png`, `g3-completed-editor-desktop-full.png`, `g3-completed-date-cleared-desktop-full.png`, `g3-reopened-desktop-full.png`: edited low priority/leap date, incomplete above completed, 2/1/1, completed metadata retained with no date, then 2/2/0 reopened. |
+| 4. Search/filter/actions | **Pass.** `g4-search-{percent,underscore,quote,report}-full.png`, `g4-filtered-{active,editor,empty,completed,deleted}-desktop-full.png`: literal and case-insensitive description search, selected filters, populated/completed or no-match list, global counts; browser/HTTP evidence verifies q/status preserved and edit dropped on Cancel/save/toggle/delete, Clear returns root. |
+| 5. Invalid/correct/delete/missing | **Pass.** `g5-inline-error-desktop-full.png`, `g5-corrected-desktop-full.png`, `g5-missing-id-desktop-full.png`, `g5-deleted-empty-desktop-full.png`: inline validation with retained text, corrected task, missing-task error/reset editor, final fresh start. Native-prohibited limits/priority/date inputs and 303/403/non-string-CSRF-422/404/405/422/no-write contracts passed in the unchanged HTTP suite, not inferred from screenshots. |
+| 6. Desktop/mobile usability | **Pass.** `g6-{populated,editor,filtered,error}-{desktop,mobile}[-full].png`: labels/controls/content/actions fit their columns, actual mobile editor-first single-column order, readable error/filter/task states; vertical scrolling exposes below-fold content with no overlap/horizontal obstruction. Hit-tested clicks, edits, filter, error submission and exact-ID deletion succeeded. |
+
+Two **capture-helper** failures were preserved and corrected without application
+changes: Group 4 initially inspected the old document after changing filter
+controls, before navigation settled. Its saved assertion failure and
+`g4-attempt1-settled-completed[-full].png` show the correctly completed result
+after load; the helper now requires a new `performance.timeOrigin` plus document
+readiness. Restored only the owned task's active precondition and reran the entire
+group, all 25 checks passing. Group 5's optional missing Cancel serialized as an
+omitted JavaScript `undefined` property, causing a Python KeyError; normalized
+that absent snapshot field to null and reran all eight unchanged expectations.
+`g4-attempt1-results.json` and `g5-attempt1-results.json` preserve those attempts.
+There was no confirmed application regression and no scope expansion.
+
+**Cleanup and remaining gate:** Each run deleted only its recorded/prefixed owned
+fixtures. IDs 73/74/76 were deleted through actual browser actions; ID 75 alone
+was removed by exact ID plus prefix after the recapture. Final exact database
+checks found only `tasks` and **zero rows**, including after final HTTP/repository
+runs. Stopped the exact attached Laravel process tree; verified web PID 75884 gone
+and port 8081 closed. Stopped only isolated Chrome PID **39524** and its ten
+owned descendants; port 9223 closed. Removed this run's restricted browser
+profile/cookies, ignored local configuration/key, temporary launch proof and 14
+generated ignored session/cache/view files. Kept non-secret scripts, results,
+metadata and **60 screenshots** (including the preserved timing investigation).
+Port 8000, other services/databases and the normal eight-task dataset were not
+contacted or changed. No push, PR, publication or deployment occurred.
+
+All required final execution/visual expectations now pass, with intermediate
+failures/recoveries disclosed above and the narrow license exception unchanged.
+**Step 3 and the transformation are not yet accepted:** the parent coordinator
+must obtain and relay the user's explicit acceptance to this same session before
+the status can be finalized. Local verified evidence is ready for that review.
 
 **Planning references:** Relevant map guidance:
 `web-frameworks\procedural-php-to-framework-knowledge.md`,
