@@ -788,7 +788,7 @@ explicit user acceptance. No push, pull request or deployment was performed.
 
 ## Step 3: Run AI-assisted user acceptance testing
 
-**Status:** pending explicit user acceptance; execution and visual evaluation complete
+**Status:** done
 
 **Source:** Laravel-managed taskboard with repository and HTTP regression checks;
 no completed visual acceptance evidence.
@@ -1013,7 +1013,7 @@ that absent snapshot field to null and reran all eight unchanged expectations.
 `g4-attempt1-results.json` and `g5-attempt1-results.json` preserve those attempts.
 There was no confirmed application regression and no scope expansion.
 
-**Cleanup and remaining gate:** Each run deleted only its recorded/prefixed owned
+**Cleanup and approval:** Each run deleted only its recorded/prefixed owned
 fixtures. IDs 73/74/76 were deleted through actual browser actions; ID 75 alone
 was removed by exact ID plus prefix after the recapture. Final exact database
 checks found only `tasks` and **zero rows**, including after final HTTP/repository
@@ -1028,9 +1028,26 @@ contacted or changed. No push, PR, publication or deployment occurred.
 
 All required final execution/visual expectations now pass, with intermediate
 failures/recoveries disclosed above and the narrow license exception unchanged.
-**Step 3 and the transformation are not yet accepted:** the parent coordinator
-must obtain and relay the user's explicit acceptance to this same session before
-the status can be finalized. Local verified evidence is ready for that review.
+The initial evidence commit `5ae864cc03fe76791e5d6098a52c6d921b0e33f5`
+correctly left Step 3 pending explicit user acceptance at that time.
+
+**Explicit final acceptance (relayed 2026-11-18 10:18, UTC+08:00):**
+Canvas parent `fff568d2-f6a3-4d39-b958-e799e20b2828` obtained the actual
+`ask_user` selection **"Accept the Laravel transformation"** after presenting
+the technical/visual results, a review link to screenshot/evidence artifacts,
+and disclosure of the intermittent timeout with the unchanged passing rerun.
+The question explicitly stated no push or PR. Coordinating parent
+`2f1d6824-b55d-453e-a19a-f7d48b119deb` relayed that decision to this same
+Step 3 session with authorization only to record acceptance and commit locally.
+
+The explicit user acceptance gate is now satisfied: **Step 3 is done and the
+Laravel transformation is accepted. All four plan steps are done.** Prior
+failures, recoveries, historical evidence boundaries and the approved
+missing-license exception remain recorded above; acceptance does not turn them
+into unqualified strict-validation success. Finalization changes only this plan
+and session evidence, without application edits, test reruns, resource restarts
+or access to live data. Cleanup remains intact. No push, PR, deployment or other
+publication is authorized by this acceptance or performed during finalization.
 
 **Planning references:** Relevant map guidance:
 `web-frameworks\procedural-php-to-framework-knowledge.md`,
