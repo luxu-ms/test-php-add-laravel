@@ -254,7 +254,7 @@ All later required validation and acceptance gates remain in force.
 
 ## Step 1: Manual includes -> Composer-managed Laravel bootstrap
 
-**Status:** pending
+**Status:** done
 
 **Source:** Dependency-free manifest, manual includes, and standalone PDO classes.
 
@@ -302,6 +302,13 @@ without database access, and the original repository assertions are retained.
 No new app, new schema, or database access is required just to bootstrap.
 Dependency installation and application correctness are separate outcomes.
 
+**Approved validation exception (2026-11-18):** The user chose to leave the
+application license unspecified and accept only Composer's existing missing-license
+warning. `composer validate --strict` must still run and its actual exit/warning
+must be recorded; this is not an unqualified strict-validation pass. Manifest/lock
+correctness and absence of any other warning/error remain mandatory. This narrow
+exception also applies to the final Step 3 validation; no other gate is waived.
+
 **Test plan:** After approved tooling is available, resolve the new framework
 constraint once, review and retain the generated lock, then run
 `composer validate --strict`, `composer check-platform-reqs`, and syntax checks
@@ -314,6 +321,169 @@ autoload-only adjustment; do not require HTTP/UAT checks before HTTP conversion.
 Expect a Laravel Framework 13.x version and a successful command listing, with no
 connection attempt or missing-provider/key/path failure. This is an in-process
 framework-bootstrap check, not proof that the web application uses Laravel.
+
+**Step 1 execution evidence (2026-11-18, UTC+08:00):**
+
+Executed only this step in worktree
+`C:\source\github-copilot\copilot-worktrees\test-php-add-laravel\luxu-ms-congenial-carnival`,
+branch `luxu-ms-php-step-1-laravel-bootstrap`, app session
+`2bae0f5f-396c-4e86-a99e-2a688b6bb42b`. Starting HEAD was verified as
+`b1259566a11eb4a2f507d392b06ec9907b162400`; initial working status was clean.
+Read this full plan, the unchanged dated readiness snapshot, and the map's
+Composer/framework, build/restore, integration/test, and escalation guidance.
+Step 0 remains done; Steps 2 and 3 remain pending.
+
+**Implementation and scope:** Added `laravel/framework:^13.0`, retaining
+`php:~8.4.0` and PDO/PDO MySQL; declared the needed cURL, Fileinfo, and Mbstring
+capabilities. PSR-4 maps `App` to `app`; a classmap maps existing global `src`
+classes. Added an Artisan-only bootstrap, provider list, and lazy provider
+bindings: PDO calls the unchanged `Database::connect()` only on resolution;
+`TaskRepository` receives that PDO. Added UTC app configuration, file sessions
+and cache, the existing `views` path/PHP engine support, minimal writable
+directory ignore files, and a non-secret `.env.example` with an empty key.
+Updated only the manual-autoload requires in setup/tests and directly related
+README commands. No new application key was needed or generated.
+
+`public\index.php`, `views\tasks.php`, `public\styles.css`,
+`database\schema.sql`, both existing `src` classes, `config\database.php`, and
+`readiness.md` are unchanged. The public application is deliberately not yet
+Laravel-managed. No routes, controller, template conversion, schema/migrations,
+ORM usage, authentication, frontend tooling, deployment, or parallel app was added.
+The framework's stock commands being listed is not permission to execute its
+database, migration, queue, installer, or server commands.
+
+**Dependency review, commands, and actual results:** All commands used PowerShell
+from this worktree. The exact approved tool paths and shared arguments were:
+
+```powershell
+$php = 'C:\Users\luxu\.copilot\session-state\fff568d2-f6a3-4d39-b958-e799e20b2828\files\php-runtime\php.exe'
+$composer = 'C:\Users\luxu\.copilot\session-state\fff568d2-f6a3-4d39-b958-e799e20b2828\files\composer\composer.phar'
+$artifacts = 'C:\Users\luxu\.copilot\session-state\50a547e7-10b0-4e68-91d5-eed66197797f\files'
+& $php -d extension=curl -d extension=fileinfo -d extension=mbstring $composer update --no-install --no-interaction --prefer-dist
+& $php -d extension=curl -d extension=fileinfo -d extension=mbstring $composer install --no-interaction --prefer-dist
+Test-Path -LiteralPath 'C:\Users\luxu\.copilot\session-state\fff568d2-f6a3-4d39-b958-e799e20b2828\files\php-runtime\ext\php_zip.dll' -PathType Leaf
+Get-Command 7z,7za,unzip -CommandType Application -ErrorAction SilentlyContinue
+& $php -d extension=curl -d extension=fileinfo -d extension=mbstring -d extension=zip --ri zip
+& $php -d extension=curl -d extension=fileinfo -d extension=mbstring -d extension=zip $composer install --no-interaction --prefer-dist
+& $php -d extension=curl -d extension=fileinfo -d extension=mbstring -d extension=zip $composer validate --strict --no-interaction
+& $php -d extension=curl -d extension=fileinfo -d extension=mbstring -d extension=zip $composer check-platform-reqs
+Get-FileHash .\composer.lock -Algorithm SHA256
+```
+
+- Before resolution, reviewed the root scripts: only the existing manual
+  `start`, `setup`, and `test` commands; no automatic event hooks, plugins,
+  private repositories, or database/setup hooks were added. Resolved once with
+  `update --no-install`: exit 0, 74 production libraries, no development packages,
+  Laravel Framework `v13.43.0`, and no reported vulnerability advisories.
+- Before installation, parsed every locked package's name/type, requirements,
+  scripts, and distribution/source hosts. All 74 are libraries; no
+  `composer-plugin`/installer packages or package scripts are present. All
+  distribution hosts are `api.github.com`, sources `github.com`.
+- The first ordinary install exited 1 in `ZipDownloader.php:81`: "The zip
+  extension and unzip/7z commands are both missing, skipping." The packaged
+  `php_zip.dll` exists, while bounded PATH discovery found no 7z/7za/unzip.
+  Consulted missing-tools/supported-alternatives guidance and obtained parent
+  approval to load this existing module process-locally. `--ri zip` exited 0:
+  Zip 1.22.8 / Libzip 1.12.1. Retried the same lock with `-d extension=zip`;
+  ordinary install exited 0 and extracted all 74 packages with normal hooks
+  enabled. No tool/extension installation, shared INI/PATH modification, platform
+  bypass, graph re-resolution, or disabled script/plugin flags occurred.
+- A second identical successful install exited 0: "Nothing to install, update
+  or remove"; autoload generation succeeded. The reviewed lock SHA256 remained
+  `93EBAD158B45BEDF2DE4CA17B1D79ECD78CD3FB538C2543D36442785865CF617`
+  before/after both installs. This verifies lock agreement and repeatability in
+  this worktree, not a separately provisioned clean machine.
+- Strict validate exited **1**, stating the manifest is valid and reporting
+  only: "No license specified, it is recommended to do so. For closed-source
+  software you may use 'proprietary' as license." This warning existed before
+  the changes. Parent relayed the user's explicit decision to leave it
+  unspecified and accept only this warning. No license was invented; this is the
+  approved exception, not strict exit-0 success.
+- `check-platform-reqs` exited 0: all 18 reported requirements succeeded,
+  including PHP 8.4.27, Composer runtime API 2.2.2, PDO/PDO MySQL, cURL, Fileinfo,
+  OpenSSL, DOM and remaining transitive capabilities. Composer labels Ctype and
+  Mbstring as supplied by polyfills; a separate native `extension_loaded`
+  assertion confirmed cURL, Fileinfo, and Mbstring actually load with the selected
+  process flags. These invocations do not verify a future web/child PHP runtime.
+
+**Syntax, class resolution, and Artisan commands/results:**
+
+```powershell
+$files = @('artisan','bootstrap\app.php','bootstrap\providers.php','app\Providers\AppServiceProvider.php','config\app.php','config\session.php','config\cache.php','config\view.php','scripts\setup.php','tests\run.php')
+$failures = 0
+foreach ($file in $files) {
+    & $php -d extension=curl -d extension=fileinfo -d extension=mbstring -l $file
+    if ($LASTEXITCODE -ne 0) { $failures++ }
+}
+& $php -d extension=curl -d extension=fileinfo -d extension=mbstring -r 'foreach (["curl", "fileinfo", "mbstring"] as $extension) { if (!extension_loaded($extension)) { fwrite(STDERR, "Required native extension missing: " . $extension . PHP_EOL); exit(1); } echo $extension . " native extension loaded" . PHP_EOL; }'
+& $php -d extension=curl -d extension=fileinfo -d extension=mbstring artisan --version
+& $php -d extension=curl -d extension=fileinfo -d extension=mbstring artisan list --raw
+& $php -d extension=curl -d extension=fileinfo -d extension=mbstring "$artifacts\step1-bootstrap-check.php" (Get-Location).Path
+```
+
+All ten touched PHP files parsed; aggregate syntax failures 0. Both direct
+Artisan commands exited 0: `Laravel Framework 13.43.0` and the normal nonempty
+command list. The session-only bootstrap checker (no fixture/substitute) resolved
+`Database`, `TaskRepository`, and `App\Providers\AppServiceProvider` classes without
+construction, booted the real console kernel, and ran its raw command listing.
+Guards fail if PDO, TaskRepository, `db.connection`, or `db.schema` resolve.
+Both application bindings stayed unresolved; the stock framework database manager
+had zero connections. UTC/runtime timezone, actual file session/cache handlers,
+the existing `tasks.php` path, and the PHP view engine were verified.
+Final checker exit 0, after the temporary credential file had been removed.
+
+Two diagnostic checker failures were corrected in the checker only, not hidden:
+the initial overbroad guard rejected stock `db` manager registration, which
+`DatabaseServiceProvider::boot()` uses without opening a connection; inspection
+confirmed lazy connection creation and the final check instead guards connection
+resolution plus asserts the manager's connection list is empty. Its initial
+literal view-path comparison also rejected Windows separator normalization;
+canonical paths now compare equal. Neither failure required an application
+change or execution of a database connection.
+
+**Approved isolated repository test and resource guards:**
+
+During this step, parent relayed explicit user approval for exactly
+`taskboard_php84_test` on the existing local MySQL, using only the restricted
+application settings from the approved ignored file
+`C:\source\github-copilot\copilot-worktrees\test-php-add-laravel\luxu-ms-congenial-couscous\config\database.local.php`.
+No other ignored files or credentials were accessed. No connection values were
+printed, logged, copied into evidence, or committed. Before writing settings, the
+new worktree's temporary ignored `config\database.local.php` had inheritance
+removed and its ACL restricted to the current user and SYSTEM; protection and
+exactly two access rules were checked, and `git check-ignore --quiet` exited 0.
+The generated configuration and `DB_DATABASE` explicitly selected the approved
+test name; remaining DB environment overrides were set process-locally from the
+approved application settings, preserving the existing TLS behavior.
+
+```powershell
+$env:DB_DATABASE = 'taskboard_php84_test'
+& $php -d extension=curl -d extension=fileinfo -d extension=mbstring "$artifacts\step1-isolated-db-check.php" (Get-Location).Path
+$local = Join-Path (Get-Location).Path 'config\database.local.php'
+Remove-Item -LiteralPath $local
+```
+
+The session-only wrapper used the unchanged `Database::connect()`, required
+`SELECT DATABASE()` to equal **exactly** `taskboard_php84_test` before mutation,
+and checked all base tables in that selected schema. Only the existing `tasks`
+table was present, with zero rows. No unknown tables/data were cleared. Then it
+required the actual `tests\run.php` and all retained assertions executed:
+**"All task repository tests passed."** Post-run exact database identity and
+`SELECT COUNT(*) FROM tasks = 0` both passed after rollback; the existing test
+table was retained. Wrapper exit 0. No setup command or Laravel database command
+ran. The generated credential file was removed immediately afterward; final
+DB-free bootstrap checks ran without it. Only this explicitly approved test
+database was contacted; the live dataset and existing app/services were untouched.
+
+**Remaining gaps and outcome:** Step 1 satisfies its revised approved criteria,
+including the original repository suite under the later explicit resource
+authorization. No HTTP request, app server, browser, screenshot, middleware/CSRF
+integration, or visual acceptance check ran; those still require Steps 2 and 3.
+Artisan CLI success does not mean the web entry point uses Laravel or prove the
+web runtime inherits process-local extension flags. No shared/live data was used
+as evidence, no generated cache/vendor files or secrets are committed, and the
+dated readiness snapshot remains unchanged. Only a local Step 1 commit is
+authorized; no push or pull request is part of this step.
 
 ## Step 2: Procedural front controller -> Laravel-managed taskboard
 
@@ -444,7 +614,9 @@ current date for the overdue case.
 checks, `php tests\run.php`, and
 `php tests\http.php --base-url=http://127.0.0.1:8081` in the approved environment.
 Preserve nonzero failures and unexecuted cases individually. These final commands
-must succeed; Step 0's best-effort rule does not waive them. Then run the scenario
+must succeed except for only the explicitly accepted missing-license warning
+described in Step 1, whose actual strict exit/warning must still be recorded;
+Step 0's best-effort rule does not waive any other requirement. Then run the scenario
 document independently as the acceptance gate, not just another name for fast tests.
 
 **Live test and observable results:** Launch the single Laravel app on the

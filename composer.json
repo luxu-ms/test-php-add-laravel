@@ -4,8 +4,20 @@
     "type": "project",
     "require": {
         "php": "~8.4.0",
+        "ext-curl": "*",
+        "ext-fileinfo": "*",
+        "ext-mbstring": "*",
         "ext-pdo": "*",
-        "ext-pdo_mysql": "*"
+        "ext-pdo_mysql": "*",
+        "laravel/framework": "^13.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        },
+        "classmap": [
+            "src/"
+        ]
     },
     "scripts": {
         "start": "php -S 127.0.0.1:8000 -t public",

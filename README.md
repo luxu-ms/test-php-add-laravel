@@ -1,8 +1,10 @@
 # Taskboard
 
 A responsive, server-rendered task manager for **PHP 8.4**. Create, edit, complete,
-reopen, and delete tasks, with MySQL storage and no frontend build step,
-Laravel, or third-party packages.
+reopen, and delete tasks, with MySQL storage and no frontend build step.
+Composer manages Laravel 13 and application autoloading. This intermediate step
+boots Laravel through Artisan only; the existing public entry point still serves
+the taskboard unchanged until the in-place HTTP conversion.
 
 ## Task organization
 
@@ -16,7 +18,9 @@ Laravel, or third-party packages.
 
 ## Requirements
 
-- PHP 8.4 with the PDO and PDO MySQL extensions enabled.
+- PHP 8.4 with PDO/PDO MySQL, cURL, Fileinfo, Mbstring, and Laravel's required
+  extensions (Ctype, DOM, Filter, Hash, OpenSSL, PCRE, Session, Tokenizer, XML).
+- Composer 2 with Composer runtime API 2.2 or later.
 - MySQL 8.0.16 or later (MySQL 8.4 LTS recommended).
 
 ## Run locally
@@ -30,7 +34,9 @@ Copy `config/database.example.php` to `config/database.local.php` and enter your
 connection details. The local file is ignored by Git. Environment variables
 `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, and `DB_PASSWORD` override the
 local configuration. Defaults are `127.0.0.1:3306` and database `taskboard_php84`.
-PHP does not automatically load `.env` files.
+The existing web entry point, setup script, and repository tests do not load
+`.env` files. Keep database settings in the existing local file or process
+environment; do not move them to Laravel's `.env`.
 
 For TLS-enabled servers, set `ssl_ca` in the local configuration (or `DB_SSL_CA`)
 to the CA certificate path. Certificate verification is enabled by default.
@@ -43,14 +49,45 @@ for remote or production connections.
 On Windows, enable `extension=pdo_mysql` and configure `extension_dir` in `php.ini`
 if your PHP distribution does not enable MySQL by default.
 
-From the repository root, initialize the application's table and start PHP:
+From the repository root, install the locked dependencies and check the
+database-free Laravel CLI bootstrap:
+
+```powershell
+composer install --no-interaction --prefer-dist
+composer validate --strict
+composer check-platform-reqs
+php artisan --version
+php artisan list --raw
+```
+
+Strict validation currently exits 1 only for the intentionally unspecified
+application license, the narrowly accepted exception recorded in
+`docs\php-x-to-y\plan.md`. Other warnings or errors are not accepted.
+
+Laravel uses UTC, file sessions/cache, and the existing `views` directory.
+Keep `bootstrap\cache`, `storage\framework\sessions`, `storage\framework\views`,
+`storage\framework\cache`, and `storage\logs` writable. Artisan boot does not
+require a database connection or application key. When preparing the later HTTP
+conversion in an approved local environment, copy `.env.example` to ignored
+`.env` and run `php artisan key:generate`; never commit the generated key.
+Do not use Artisan database/migration commands: `config\database.php` remains
+the application's flat PDO configuration, not Laravel database-manager settings.
+
+All commands must use PHP with the required extensions enabled. If supplying
+process-local `-d extension=...` flags, include them on every PHP invocation,
+including the invocation of `composer.phar`; child PHP processes do not
+automatically inherit those flags. The existing Composer `start`, `setup`, and
+`test` scripts invoke a separate PHP process.
+
+Only with an approved dedicated MySQL database/account configured, initialize
+the application's table and start the existing public entry point:
 
 ```powershell
 php scripts\setup.php
 php -S 127.0.0.1:8000 -t public
 ```
 
-Open <http://127.0.0.1:8000>. Composer is optional; `composer setup` and
+Open <http://127.0.0.1:8000>. `composer setup` and
 `composer start` run the same commands. Setup creates the table if missing; it does
 not drop existing tables. The web application only needs SELECT, INSERT, UPDATE,
 and DELETE permissions after setup.
@@ -71,8 +108,10 @@ Remove-Item Env:DB_DATABASE
 
 Other connection settings use the same local configuration or environment variables.
 Tests refuse database names that do not end in `_test`. Test rows are rolled back;
-the test table remains for subsequent runs. If Composer is installed, `composer test`
-also runs them.
+the test table remains for subsequent runs. The runner connects before checking
+the name and creates its table outside the rollback transaction, so the suffix
+alone is not permission or isolation. Run only against an explicitly approved
+isolated test database. `composer test` also runs these same database tests.
 
 ## Configuration and deployment
 
