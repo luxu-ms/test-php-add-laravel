@@ -1,0 +1,92 @@
+:root {
+    color-scheme: light;
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: #25372f;
+    background: #f7f8f3;
+    font-synthesis: none;
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+button, input, textarea, select { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+a { color: #34664c; text-decoration: none; }
+a:hover { text-decoration: underline; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid #557f5c; outline-offset: 4px; }
+.shell { max-width: 1160px; margin: auto; padding: 34px 40px; }
+.page-header { display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.brand { color: #25372f; font-size: 26px; font-weight: 750; letter-spacing: -1px; }
+.brand span { color: #719565; }
+.badge { color: #647064; font-size: 12px; border: 1px solid #dfe5d9; border-radius: 30px; padding: 9px 14px; }
+.intro { margin: 65px 0 32px; }
+.eyebrow { font-size: 10px; font-weight: 750; letter-spacing: 2px; color: #6b8260; }
+h1 { margin: 18px 0; font-size: clamp(42px, 6vw, 66px); line-height: 1.05; letter-spacing: -3px; font-weight: 650; }
+h1 span { color: #718b61; }
+.intro > p:last-child { color: #778073; font-size: 14px; line-height: 1.7; }
+.summary { display: flex; padding: 23px 0 28px; border-top: 1px solid #e0e5d9; border-bottom: 1px solid #e0e5d9; }
+.summary > div { min-width: 155px; display: flex; flex-direction: column; gap: 7px; padding: 0 35px; border-left: 1px solid #e0e5d9; }
+.summary > div:first-child { padding-left: 0; border: 0; }
+.summary strong { font-size: 27px; font-weight: 600; }
+.summary span { color: #747d6e; font-size: 12px; }
+.workspace { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); align-items: start; gap: 40px; margin-top: 36px; }
+.section-heading { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 20px; }
+h2 { font-size: 19px; font-weight: 650; margin: 0; letter-spacing: -.4px; }
+.section-heading > span { color: #7c8576; font-size: 12px; }
+.filters { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; margin-bottom: 20px; }
+.filters label { margin-top: 0; }
+.search-field { flex: 1 1 180px; }
+.filter-button { background: #e5ecdf; border: 1px solid #cdd9c5; border-radius: 7px; color: #345b44; padding: 13px; font-size: 12px; }
+.filter-button:hover { background: #d9e4d1; }
+.reset { font-size: 12px; padding: 13px 0; }
+.task { display: flex; gap: 15px; background: #fff; border: 1px solid #e5e9df; border-radius: 12px; padding: 22px; margin-bottom: 12px; }
+.toggle { width: 23px; height: 23px; padding: 0; background: white; border: 1.5px solid #b5c3ac; border-radius: 50%; color: white; font-size: 15px; }
+.toggle:hover { border-color: #34664c; }
+.task-content { min-width: 0; flex: 1; overflow-wrap: anywhere; }
+.task h3 { font-size: 15px; line-height: 1.5; margin: 0 0 6px; font-weight: 600; }
+.task p { font-size: 13px; color: #778073; line-height: 1.7; margin: 0 0 14px; }
+.task-status { display: inline-block; font-size: 10px; color: #7d7651; background: #f5f2e7; padding: 4px 8px; border-radius: 5px; }
+.priority { display: inline-block; font-size: 10px; padding: 4px 8px; border-radius: 5px; margin: 4px 0 0 4px; }
+.priority-low { background: #e9eff3; color: #476475; }
+.priority-medium { background: #f5eddb; color: #7b632b; }
+.priority-high { background: #f8e4de; color: #934e3c; }
+.due-date { display: block; font-size: 11px; color: #65715c; margin-top: 12px; }
+.overdue { color: #a13e2d; font-weight: 600; }
+.task-actions { display: flex; gap: 18px; margin-top: 17px; font-size: 12px; }
+.delete { border: 0; background: none; padding: 0; color: #926b60; font-size: 12px; }
+.delete:hover { text-decoration: underline; }
+.is-complete { background: #f1f5ee; }
+.is-complete h3 { text-decoration: line-through; color: #7e8b76; }
+.is-complete .toggle { background: #718b61; border-color: #718b61; }
+.is-complete .task-status { background: #e3ecdd; color: #547045; }
+.editor { background: #edf1e7; padding: 28px; border: 1px solid #e0e7d9; border-radius: 14px; }
+.editor .eyebrow { margin-top: 0; }
+.editor h2 { margin-top: 16px; font-size: 23px; }
+.editor-hint { color: #77836d; font-size: 13px; margin: 9px 0 27px; }
+label { display: block; font-size: 12px; font-weight: 600; margin: 20px 0 9px; }
+label span { color: #65715c; font-weight: normal; }
+input:not([type="hidden"]), textarea, select { width: 100%; min-width: 0; padding: 13px; color: #25372f; background: #fafbf8; border: 1px solid #d8e0d1; border-radius: 7px; font-size: 12px; line-height: 1.6; }
+.task-options { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 12px; }
+textarea { resize: vertical; min-height: 120px; }
+input::placeholder, textarea::placeholder { color: #838d7c; }
+.primary { width: 100%; color: white; background: #345b44; border: none; padding: 13px; margin-top: 20px; border-radius: 7px; font-size: 13px; font-weight: 600; }
+.primary:hover { background: #264733; }
+.cancel { display: block; text-align: center; margin-top: 15px; font-size: 12px; }
+.editor-footer { text-align: center; color: #79856f; font-size: 11px; margin: 22px 0 0; }
+.empty { text-align: center; padding: 60px 25px; border: 1px dashed #cdd7c5; border-radius: 12px; color: #737f6a; }
+.empty-mark { display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: #e7eddf; font-size: 27px; }
+.empty h3 { font-size: 18px; font-weight: 600; color: #506347; }
+.empty p { font-size: 13px; line-height: 1.8; max-width: 240px; margin: auto; }
+.notice, .error { padding: 14px 18px; border-radius: 8px; font-size: 14px; }
+.notice { background: #e2edda; color: #36502b; }
+.error { background: #f7e6df; color: #813d2c; }
+.page-footer { color: #88917f; font-size: 11px; text-align: center; padding: 48px 0 10px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+@media (max-width: 760px) {
+    .shell { padding: 25px 22px; }
+    .badge { display: none; }
+    .intro { margin-top: 45px; }
+    .workspace { grid-template-columns: 1fr; gap: 28px; }
+    .editor { grid-row: 1; }
+    .summary > div { min-width: 0; flex: 1; padding: 0 18px; }
+    .summary span { font-size: 11px; }
+}

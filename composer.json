@@ -1,0 +1,15 @@
+{
+    "name": "app/task-manager",
+    "description": "A lightweight PHP 8.4 task manager.",
+    "type": "project",
+    "require": {
+        "php": "~8.4.0",
+        "ext-pdo": "*",
+        "ext-pdo_mysql": "*"
+    },
+    "scripts": {
+        "start": "php -S 127.0.0.1:8000 -t public",
+        "setup": "php scripts/setup.php",
+        "test": "php tests/run.php"
+    }
+}
