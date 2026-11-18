@@ -1,0 +1,3 @@
+/storage/*.sqlite*
+/vendor/
+/config/database.local.php
